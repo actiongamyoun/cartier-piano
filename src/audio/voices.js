@@ -85,6 +85,35 @@ export const VOICES = [
       envelope: { attack: 0.005, decay: 0.9, sustain: 0.1, release: 1 },
     }),
   },
+  // ---- 8비트 / 칩튠 (NES 채널 구성을 본뜸) ----
+  // dry:true → 리버브를 거치지 않고 마스터로 직결 (칩튠은 드라이가 자연스러움)
+  // createFx → 보이스 풀과 dest 사이에 끼우는 이펙트 (살짝 크런치)
+  {
+    id: 'nes_lead', name: '8-bit Lead', sub: '사각파 50%', hue: 130, dry: true,
+    createMono: () => new Tone.Synth({
+      oscillator: { type: 'square' },
+      envelope: { attack: 0.001, decay: 0.08, sustain: 0.85, release: 0.06 },
+      volume: -9,
+    }),
+    createFx: () => new Tone.Distortion({ distortion: 0.12, wet: 0.5 }),
+  },
+  {
+    id: 'nes_pulse', name: '8-bit Pulse', sub: '펄스 25%', hue: 300, dry: true,
+    createMono: () => new Tone.Synth({
+      oscillator: { type: 'pulse', width: 0.5 },
+      envelope: { attack: 0.001, decay: 0.08, sustain: 0.8, release: 0.06 },
+      volume: -9,
+    }),
+    createFx: () => new Tone.Distortion({ distortion: 0.12, wet: 0.5 }),
+  },
+  {
+    id: 'nes_bass', name: '8-bit Bass', sub: '삼각파', hue: 95, dry: true,
+    createMono: () => new Tone.Synth({
+      oscillator: { type: 'triangle' },
+      envelope: { attack: 0.002, decay: 0.1, sustain: 0.9, release: 0.08 },
+      volume: -4,
+    }),
+  },
 ]
 
 // UI 라벨용 정적 메타 (createDrumKit 의 pads 순서와 일치)

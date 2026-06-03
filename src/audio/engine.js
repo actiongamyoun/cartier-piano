@@ -3,11 +3,19 @@ import { VOICES, createDrumKit } from './voices.js'
 
 // 수동 폴리포니: 모노 신스 풀을 round-robin 으로 돌린다.
 // 같은 워클릿 모듈(PluckSynth 등)은 인스턴스를 여러 개 만들어도 모듈은 1회만 등록되므로 안전.
-function makePoly(createMono, count, dest) {
+function makePoly(createMono, count, dest, createFx) {
+  // 옵션 이펙트: voices → fx → dest
+  let target = dest
+  let fxNode = null
+  if (createFx) {
+    fxNode = createFx()
+    fxNode.connect(dest)
+    target = fxNode
+  }
   const voices = []
   for (let i = 0; i < count; i++) {
     const v = createMono()
-    v.connect(dest)
+    v.connect(target)
     voices.push(v)
   }
   const noteToVoice = new Map()
@@ -36,6 +44,7 @@ function makePoly(createMono, count, dest) {
     },
     dispose() {
       voices.forEach((v) => { try { v.dispose() } catch (e) { /* noop */ } })
+      if (fxNode) { try { fxNode.dispose() } catch (e) { /* noop */ } }
     },
   }
 }
@@ -81,7 +90,8 @@ export class AudioEngine {
     }
     const def = VOICES.find((v) => v.id === voiceId) || VOICES[0]
     this.mode = 'melodic'
-    this.poly = makePoly(def.createMono, 10, this.reverb)
+    const dest = def.dry ? this.master : this.reverb
+    this.poly = makePoly(def.createMono, 10, dest, def.createFx)
     this.currentVoiceId = def.id
   }
 
